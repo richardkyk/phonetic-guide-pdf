@@ -1,0 +1,10 @@
+{
+  "name": "phonetic-guide",
+  "version": "0.1.0",
+  "dependencies": {
+    "chinese-to-pinyin": "^1.1.2",
+    "pdfkit": "^0.10.0",
+    "xlsx": "^0.14.4",
+    "zhuyin": "^1.11.0"
+  }
+}
