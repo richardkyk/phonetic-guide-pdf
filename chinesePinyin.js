@@ -4,13 +4,17 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const XLSX = require("xlsx");
 
+// const font = "C://WINDOWS//FONTS//DENGL.TTF";
+const font =
+  "E://Users//Xepht//Documents//Xepht//Scripts//Temple//phonetic guide//DENGL2.ttf";
+
 const A4 = [595.28, 841.89];
 const doc = new PDFDocument({ autoFirstPage: false });
 let pageNumber = 1;
 doc.on("pageAdded", () => {
   //Add page number to the bottom of the every page
   doc
-    .font("C://WINDOWS//FONTS//DENGL.TTF")
+    .font(font)
     .fontSize(10)
     .text(pageNumber, 540, 780);
   pageNumber++;
@@ -84,7 +88,7 @@ function createPDF(phrases) {
 function writeText(text, fontSize, x, y, characterSpacing = null) {
   // Chinese characters
   doc
-    .font("C://WINDOWS//FONTS//DENGL.TTF")
+    .font(font)
     .fontSize(fontSize)
     .text(text.chinese, x, y + pinyinSize, {
       characterSpacing,
@@ -97,7 +101,7 @@ function writeText(text, fontSize, x, y, characterSpacing = null) {
     const pinyinWidth = getWidth(word, pinyinSize);
     const offset = (fontSize - pinyinWidth) / 2;
     doc
-      .font("C://WINDOWS//FONTS//DENGL.TTF")
+      .font(font)
       .fontSize(pinyinSize)
       .text(word, x + offset, y);
     x += fontSize + characterSpacing;
@@ -106,7 +110,7 @@ function writeText(text, fontSize, x, y, characterSpacing = null) {
 
 function getWidth(text, fontSize, characterSpacing = null) {
   return doc
-    .font("C://WINDOWS//FONTS//DENGL.TTF")
+    .font(font)
     .fontSize(fontSize)
     .widthOfString(text, {
       characterSpacing
@@ -127,27 +131,28 @@ function parseLectureData(filename) {
 const path = "E://Users//Xepht//Documents//Temple//Ceremonies//";
 // "C://Users//RichardKYK//Documents//Temple//Ceremonies//";
 
-const filename = "三天法會";
-// const filename = "初一（十五）禮"
-// const filename = "參（辭）駕禮"
-// const filename = "安座禮"
-// const filename = "早晚香禮"
+// const filename = "三天法會";
+// const filename = "初一（十五）禮";
+// const filename = "參（辭）駕禮";
+// const filename = "安座禮";
+// const filename = "早晚香禮";
 // const filename = "獻供禮";
 // const filename = "老中大典禮";
-// const filename = "謝恩禮"
+// const filename = "謝恩禮";
 // const filename = "辦道禮";
 // const filename = "過年禮";
-// const filename = "道喜（祝壽）禮"
-// const filename = "開班禮";
+// const filename = "道喜（祝壽）禮";
+const filename = "開班禮";
 
 const ceremony = path + filename + ".xlsx";
 doc.pipe(fs.createWriteStream(`${filename}.pdf`));
 
-generatePhonetics(ceremony);
+// generatePhonetics(ceremony);
 parseLectureData(ceremony);
 
+console.log(zhuyin.fromPinyinSyllable("lv"));
 // console.log(pinyin("大家一起懺悔"));
-console.log(zhuyin("zuò yī guì"));
+console.log(zhuyin("gè wèi fǎ lv zhù"));
 
 function generatePhonetics(filename) {
   const workbook = XLSX.readFile(filename);
