@@ -6,7 +6,7 @@ const XLSX = require("xlsx");
 
 // const font = "C://WINDOWS//FONTS//DENGL.TTF";
 const font =
-  "E://Users//Xepht//Documents//Xepht//Scripts//Temple//phonetic guide//DENGL2.ttf";
+  "E://Users//Xepht//Documents//Xepht//Scripts//Temple//phonetic guide//DENGL.ttf";
 
 const A4 = [595.28, 841.89];
 const doc = new PDFDocument({ autoFirstPage: false });

@@ -2,10 +2,9 @@ const zhuyin = require("zhuyin");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const XLSX = require("xlsx");
+
 // const font = "C://WINDOWS//FONTS//DENGL.TTF";
-// const font = "E://Users//Xepht//Desktop//DengXian3//OpenType-TT//DENGL.TTF";
-const font =
-  "E://Users//Xepht//Documents//Xepht//Scripts//Temple//phonetic guide//Dengl.ttf";
+const font = `${__dirname}\\DENGL.ttf`;
 
 const A4 = [595.28, 841.89];
 const doc = new PDFDocument({ autoFirstPage: false });
@@ -28,8 +27,6 @@ doc.addPage({
 // Check out the link for spacing calculations
 // You can calculate whether the zhuyin is longer or the character
 // Then offset both accordingly
-
-// doc.pipe(fs.createWriteStream(`${filename}.pdf`));
 
 const fontSize = 18; // Font size of the chinese characters
 const zhuyinSize = 6; // Font size of the zhuyin
@@ -164,26 +161,22 @@ function parseLectureData(filename) {
   createPDF(data);
 }
 
-const path = "E://Users//Xepht//Documents//Temple//Ceremonies//";
-// "C://Users//RichardKYK//Documents//Temple//Ceremonies//";
-
 // const filename = "三天法會";
-const filename = "初一（十五）禮";
+// const filename = "初一（十五）禮";
 // const filename = "參（辭）駕禮";
 // const filename = "安座禮";
 // const filename = "早晚香禮";
 // const filename = "獻供禮";
-// const filename = "老中大典禮";
+const filename = "老中大典禮";
 // const filename = "謝恩禮";
 // const filename = "辦道禮";
 // const filename = "過年禮";
 // const filename = "道喜（祝壽）禮";
 // const filename = "開班禮";
 
-const ceremony = path + filename + ".xlsx";
+const ceremony = `${__dirname}\\ceremonies\\${filename}.xlsx`;
 doc.pipe(fs.createWriteStream(`${filename}.pdf`));
-
 parseLectureData(ceremony);
 
 // console.log(zhuyin("大家一起懺悔"));
-console.log(zhuyin("gè wèi fǎ lv zhù"));
+// console.log(zhuyin("gè wèi fǎ lv zhù"));
