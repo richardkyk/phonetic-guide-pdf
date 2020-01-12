@@ -1,35 +1,15 @@
-const pinyin = require("chinese-to-pinyin");
-const zhuyin = require("zhuyin");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const XLSX = require("xlsx");
-
-// const font = "C://WINDOWS//FONTS//DENGL.TTF";
-const font = `${__dirname}\\DENGL.ttf`;
-
-const A4 = [595.28, 841.89];
-const doc = new PDFDocument({ autoFirstPage: false });
-let pageNumber = 1;
-doc.on("pageAdded", () => {
-  //Add page number to the bottom of the every page
-  doc
-    .font(font)
-    .fontSize(10)
-    .text(pageNumber, 540, 780);
-  pageNumber++;
-});
-
-doc.addPage({
-  margin: 0,
-  size: "A4"
-});
 
 // https://github.com/foliojs/pdfkit/issues/346
 // Check out the link for spacing calculations
 // You can calculate whether the pinyin is longer or the character
 // Then offset both accordingly
 
-// doc.pipe(fs.createWriteStream(`${filename}.pdf`));
+const A4 = [595.28, 841.89];
+const font = `${__dirname}\\DENGL.ttf`;
+// const font = "C://WINDOWS//FONTS//DENGL.TTF";
 const fontSize = 20; // Font size of the chinese characters
 const pinyinSize = 10; // Font size of the pinyin
 const titleSize = 30; // Font size of the title
@@ -37,7 +17,7 @@ const characterSpacing = 5; // Distance between letters
 let titleSpacing = characterSpacing * 5; // Distance below the title
 const margin = 72; // Margin top, bottom, left and right
 
-function createPDF(phrases) {
+function createPDF(phrases, doc) {
   let anchorRow = 0;
   phrases.forEach(phrase => {
     let x = margin;
@@ -45,17 +25,19 @@ function createPDF(phrases) {
     switch (phrase.align) {
       case "right":
         x =
-          A4[0] - margin - getWidth(phrase.chinese, fontSize, characterSpacing);
-        // x = rightAlign(phrase.chinese, fontSize, characterSpacing);
+          A4[0] -
+          margin -
+          getWidth(phrase.chinese, fontSize, doc, characterSpacing);
         break;
       case "center":
-        x = (A4[0] - getWidth(phrase.chinese, fontSize, characterSpacing)) / 2;
-        // return (A4[0] - size) / 2;
-        // x = centerAlign(phrase.chinese, fontSize, characterSpacing);
+        x =
+          (A4[0] - getWidth(phrase.chinese, fontSize, doc, characterSpacing)) /
+          2;
         break;
       case "centerTitle":
-        x = (A4[0] - getWidth(phrase.chinese, titleSize, characterSpacing)) / 2;
-        // x = centerAlign(phrase.chinese, titleSize, characterSpacing);
+        x =
+          (A4[0] - getWidth(phrase.chinese, titleSize, doc, characterSpacing)) /
+          2;
         break;
       default:
         // Else left align is just the margin
@@ -76,15 +58,15 @@ function createPDF(phrases) {
       });
     }
     if (phrase.row == 0) {
-      writeText(phrase, titleSize, x, y - titleSpacing, characterSpacing);
+      writeText(phrase, titleSize, x, y - titleSpacing, doc, characterSpacing);
     } else {
-      writeText(phrase, fontSize, x, y, characterSpacing);
+      writeText(phrase, fontSize, x, y, doc, characterSpacing);
     }
   });
   doc.end();
 }
 
-function writeText(text, fontSize, x, y, characterSpacing = null) {
+function writeText(text, fontSize, x, y, doc, characterSpacing = null) {
   // Chinese characters
   doc
     .font(font)
@@ -97,7 +79,7 @@ function writeText(text, fontSize, x, y, characterSpacing = null) {
   // Pinyin
   const words = text.pinyin.split(" ");
   words.forEach(word => {
-    const pinyinWidth = getWidth(word, pinyinSize);
+    const pinyinWidth = getWidth(word, pinyinSize, doc);
     const offset = (fontSize - pinyinWidth) / 2;
     doc
       .font(font)
@@ -107,7 +89,7 @@ function writeText(text, fontSize, x, y, characterSpacing = null) {
   });
 }
 
-function getWidth(text, fontSize, characterSpacing = null) {
+function getWidth(text, fontSize, doc, characterSpacing = null) {
   return doc
     .font(font)
     .fontSize(fontSize)
@@ -116,62 +98,61 @@ function getWidth(text, fontSize, characterSpacing = null) {
     });
 }
 
-function parseLectureData(filename) {
-  const myRegexp = /([^/]+)\.xlsx$/;
-  const title = myRegexp.exec(filename)[1];
-  // console.log(title);
+function parseLectureData(filename, doc) {
   const workbook = XLSX.readFile(filename);
   var sheet_name_list = workbook.SheetNames;
   const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-  // console.log(data);
-  createPDF(data);
+  createPDF(data, doc);
 }
 
-// const filename = "三天法會";
-// const filename = "初一（十五）禮";
-// const filename = "參（辭）駕禮";
-// const filename = "安座禮";
-// const filename = "早晚香禮";
-// const filename = "獻供禮";
-// const filename = "老中大典禮";
-// const filename = "謝恩禮";
-// const filename = "辦道禮";
-// const filename = "過年禮";
-// const filename = "道喜（祝壽）禮";
-const filename = "開班禮";
+// This is to create PDFs for individual ceremonies
+// const files = ["三天法會"]
+// const files = ["初一（十五）禮"]
+// const files = ["參（辭）駕禮"]
+// const files = ["安座禮"]
+// const files = ["早晚香禮"]
+// const files = ["獻供禮"]
+// const files = ["老中大典禮"]
+// const files = ["謝恩禮"];
+// const files = ["辦道禮"]
+// const files = ["過年禮"]
+// const files = ["道喜（祝壽）禮"]
+// const files = ["開班禮"]
 
-const ceremony = `${__dirname}\\ceremonies\\${filename}.xlsx`;
-doc.pipe(fs.createWriteStream(`${filename}.pdf`));
+// This is to create PDFs for all the ceremonies in bulk
+const files = [
+  "三天法會",
+  "初一（十五）禮",
+  "參（辭）駕禮",
+  "安座禮",
+  "早晚香禮",
+  "獻供禮",
+  "老中大典禮",
+  "謝恩禮",
+  "辦道禮",
+  "過年禮",
+  "道喜（祝壽）禮",
+  "開班禮"
+];
 
-// generatePhonetics(ceremony);
-parseLectureData(ceremony);
-
-// console.log(zhuyin.fromPinyinSyllable("lv"));
-// console.log(pinyin("大家一起懺悔"));
-// console.log(zhuyin("gè wèi fǎ lv zhù"));
-
-function generatePhonetics(filename) {
-  const workbook = XLSX.readFile(filename);
-  var sheet_name_list = workbook.SheetNames;
-  const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-  const exportData = [];
-  data.forEach(phrase => {
-    if (!phrase.pinyin) {
-      phrase.pinyin = pinyin(phrase.chinese);
-    }
-    if (!phrase.zhuyin) {
-      phrase.zhuyin = zhuyin(phrase.pinyin).join(" ");
-    }
-    exportData.push(phrase);
+files.forEach(file => {
+  const doc = new PDFDocument({ autoFirstPage: false });
+  let pageNumber = 1;
+  doc.on("pageAdded", () => {
+    //Add page number to the bottom of the every page
+    doc
+      .font(font)
+      .fontSize(10)
+      .text(pageNumber, 540, 780);
+    pageNumber++;
   });
 
-  download(exportData);
-}
+  doc.addPage({
+    margin: 0,
+    size: "A4"
+  });
 
-function download(exportData) {
-  const data = XLSX.utils.json_to_sheet(exportData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, data);
-  const name = `Pinyin.xlsx`;
-  XLSX.writeFile(wb, name);
-}
+  const ceremony = `${__dirname}\\ceremonies\\${file}.xlsx`;
+  doc.pipe(fs.createWriteStream(`${file}.pdf`));
+  parseLectureData(ceremony, doc);
+});
