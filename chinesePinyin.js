@@ -5,8 +5,7 @@ const fs = require("fs");
 const XLSX = require("xlsx");
 
 // const font = "C://WINDOWS//FONTS//DENGL.TTF";
-const font =
-  "E://Users//Xepht//Documents//Xepht//Scripts//Temple//phonetic guide//DENGL.ttf";
+const font = `${__dirname}\\DENGL.ttf`;
 
 const A4 = [595.28, 841.89];
 const doc = new PDFDocument({ autoFirstPage: false });
@@ -128,9 +127,6 @@ function parseLectureData(filename) {
   createPDF(data);
 }
 
-const path = "E://Users//Xepht//Documents//Temple//Ceremonies//";
-// "C://Users//RichardKYK//Documents//Temple//Ceremonies//";
-
 // const filename = "三天法會";
 // const filename = "初一（十五）禮";
 // const filename = "參（辭）駕禮";
@@ -144,15 +140,15 @@ const path = "E://Users//Xepht//Documents//Temple//Ceremonies//";
 // const filename = "道喜（祝壽）禮";
 const filename = "開班禮";
 
-const ceremony = path + filename + ".xlsx";
+const ceremony = `${__dirname}\\ceremonies\\${filename}.xlsx`;
 doc.pipe(fs.createWriteStream(`${filename}.pdf`));
 
 // generatePhonetics(ceremony);
 parseLectureData(ceremony);
 
-console.log(zhuyin.fromPinyinSyllable("lv"));
+// console.log(zhuyin.fromPinyinSyllable("lv"));
 // console.log(pinyin("大家一起懺悔"));
-console.log(zhuyin("gè wèi fǎ lv zhù"));
+// console.log(zhuyin("gè wèi fǎ lv zhù"));
 
 function generatePhonetics(filename) {
   const workbook = XLSX.readFile(filename);
