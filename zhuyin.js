@@ -4,18 +4,25 @@ const XLSX = require("xlsx");
 
 // https://github.com/foliojs/pdfkit/issues/346
 // Check out the link for spacing calculations
-// You can calculate whether the pinyin is longer or the character
+// You can calculate whether the zhuyin is longer or the character
 // Then offset both accordingly
 
 const A4 = [595.28, 841.89];
 const font = `${__dirname}\\DENGL.ttf`;
 // const font = "C://WINDOWS//FONTS//DENGL.TTF";
-const fontSize = 20; // Font size of the chinese characters
-const pinyinSize = 10; // Font size of the pinyin
+const fontSize = 18; // Font size of the chinese characters
+const zhuyinSize = 6; // Font size of the zhuyin
 const titleSize = 30; // Font size of the title
-const characterSpacing = 5; // Distance between letters
+const characterSpacing = 10; // Distance between letters
 let titleSpacing = characterSpacing * 5; // Distance below the title
-const margin = 72; // Margin top, bottom, left and right
+const margin = 36; // Margin top, bottom, left and right
+
+function parseLectureData(filename, doc) {
+  const workbook = XLSX.readFile(filename);
+  var sheet_name_list = workbook.SheetNames;
+  const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+  createPDF(data, doc);
+}
 
 function createPDF(phrases, doc) {
   let anchorRow = 0;
@@ -46,49 +53,33 @@ function createPDF(phrases, doc) {
     }
 
     let y =
-      margin +
-      (phrase.row - anchorRow) * (pinyinSize + fontSize + characterSpacing);
+      margin + (phrase.rowZhuyin - anchorRow) * (characterSpacing + fontSize);
 
     if (y >= A4[1] - margin) {
       y = margin;
-      anchorRow = phrase.row;
+      anchorRow = phrase.rowZhuyin;
       doc.addPage({
         margin: 0,
         size: "A4"
       });
     }
-    if (phrase.row == 0) {
-      writeText(phrase, titleSize, x, y - titleSpacing, doc, characterSpacing);
+    if (phrase.rowZhuyin == 0) {
+      writeZhuyin(phrase, titleSize, x, y / 2, doc, characterSpacing);
     } else {
-      writeText(phrase, fontSize, x, y, doc, characterSpacing);
+      writeZhuyin(phrase, fontSize, x, y, doc, characterSpacing);
     }
   });
   doc.end();
 }
 
-function writeText(text, fontSize, x, y, doc, characterSpacing = null) {
-  // Chinese characters
-  doc
+function getHeight(text, fontSize, doc, characterSpacing = null) {
+  return doc
     .font(font)
     .fontSize(fontSize)
-    .text(text.chinese, x, y + pinyinSize, {
-      characterSpacing,
-      lineBreak: false
+    .heightOfString(text, {
+      characterSpacing
     });
-
-  // Pinyin
-  const words = text.pinyin.split(" ");
-  words.forEach(word => {
-    const pinyinWidth = getWidth(word, pinyinSize, doc);
-    const offset = (fontSize - pinyinWidth) / 2;
-    doc
-      .font(font)
-      .fontSize(pinyinSize)
-      .text(word, x + offset, y);
-    x += fontSize + characterSpacing;
-  });
 }
-
 function getWidth(text, fontSize, doc, characterSpacing = null) {
   return doc
     .font(font)
@@ -97,12 +88,47 @@ function getWidth(text, fontSize, doc, characterSpacing = null) {
       characterSpacing
     });
 }
+function writeZhuyin(text, fontSize, x, y, doc, characterSpacing = null) {
+  // Chinese characters
+  doc
+    .font(font)
+    .fontSize(fontSize)
+    .text(text.chinese, x, y, {
+      characterSpacing,
+      lineBreak: false
+    });
 
-function parseLectureData(filename, doc) {
-  const workbook = XLSX.readFile(filename);
-  var sheet_name_list = workbook.SheetNames;
-  const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-  createPDF(data, doc);
+  // Zhuyin
+  const words = text.zhuyin.split(" ");
+
+  // Splitting the phrase into words
+  words.forEach(word => {
+    let offset = 0;
+    x += fontSize;
+
+    // Splitting the zhuyin into glyphs
+    word.split("").forEach(symbol => {
+      const zhuyinHeight = getHeight(symbol, zhuyinSize, doc);
+
+      let toneSize = 0;
+      let toneOffset = 0;
+      if ("`ˇˊ".includes(symbol)) {
+        toneSize = 10;
+        toneOffset =
+          (getWidth(symbol, toneSize + zhuyinSize, doc) - zhuyinSize) / 2 -
+          zhuyinSize +
+          1; // offset for the tone to bring it 1 unit closer to the character
+        offset = (offset - zhuyinHeight) / 2;
+      }
+
+      doc
+        .font(font)
+        .fontSize(zhuyinSize + toneSize)
+        .text(symbol, x - toneOffset, y + offset);
+      offset += zhuyinHeight;
+    });
+    x += characterSpacing;
+  });
 }
 
 // This is to create PDFs for individual ceremonies
@@ -143,7 +169,7 @@ files.forEach(file => {
     doc
       .font(font)
       .fontSize(10)
-      .text(pageNumber, 540, 780);
+      .text(pageNumber, 570, 820);
     pageNumber++;
   });
 
