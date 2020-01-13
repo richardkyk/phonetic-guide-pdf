@@ -17,6 +17,58 @@ const characterSpacing = 10; // Distance between letters
 let titleSpacing = characterSpacing * 5; // Distance below the title
 const margin = 36; // Margin top, bottom, left and right
 
+// This is to create PDFs for individual ceremonies
+// const files = ["三天法會"];
+// const files = ["初一（十五）禮"]
+// const files = ["參（辭）駕禮"]
+// const files = ["安座禮"];
+// const files = ["早晚香禮"]
+// const files = ["獻供禮"]
+// const files = ["老中大典禮"]
+// const files = ["謝恩禮"];
+// const files = ["辦道禮"]
+// const files = ["過年禮"]
+// const files = ["道喜（祝壽）禮"]
+// const files = ["開班禮"]
+
+// This is to create PDFs for all the ceremonies in bulk
+const files = [
+  "三天法會",
+  "初一（十五）禮",
+  "參（辭）駕禮",
+  "安座禮",
+  "早晚香禮",
+  "獻供禮",
+  "老中大典禮",
+  "謝恩禮",
+  "辦道禮",
+  "過年禮",
+  "道喜（祝壽）禮",
+  "開班禮"
+];
+
+files.forEach(file => {
+  const doc = new PDFDocument({ autoFirstPage: false });
+  let pageNumber = 1;
+  doc.on("pageAdded", () => {
+    //Add page number to the bottom of the every page
+    doc
+      .font(font)
+      .fontSize(10)
+      .text(pageNumber, 570, 820);
+    pageNumber++;
+  });
+
+  doc.addPage({
+    margin: 0,
+    size: "A4"
+  });
+
+  const ceremony = `${__dirname}\\ceremonies\\${file}.xlsx`;
+  doc.pipe(fs.createWriteStream(`${file}.pdf`));
+  parseLectureData(ceremony, doc);
+});
+
 function parseLectureData(filename, doc) {
   const workbook = XLSX.readFile(filename);
   var sheet_name_list = workbook.SheetNames;
@@ -30,6 +82,13 @@ function createPDF(phrases, doc) {
     let x = margin;
 
     switch (phrase.align) {
+      case "break":
+        anchorRow = 1;
+        doc.addPage({
+          margin: 0,
+          size: "A4"
+        });
+        return;
       case "right":
         x =
           A4[0] -
@@ -52,18 +111,17 @@ function createPDF(phrases, doc) {
         break;
     }
 
-    let y =
-      margin + (phrase.rowZhuyin - anchorRow) * (characterSpacing + fontSize);
+    let y = margin + (phrase.row - anchorRow) * (characterSpacing + fontSize);
 
     if (y >= A4[1] - margin) {
       y = margin;
-      anchorRow = phrase.rowZhuyin;
+      anchorRow = phrase.row;
       doc.addPage({
         margin: 0,
         size: "A4"
       });
     }
-    if (phrase.rowZhuyin == 0) {
+    if (phrase.row == 0) {
       writeZhuyin(phrase, titleSize, x, y / 2, doc, characterSpacing);
     } else {
       writeZhuyin(phrase, fontSize, x, y, doc, characterSpacing);
@@ -130,55 +188,3 @@ function writeZhuyin(text, fontSize, x, y, doc, characterSpacing = null) {
     x += characterSpacing;
   });
 }
-
-// This is to create PDFs for individual ceremonies
-// const files = ["三天法會"]
-// const files = ["初一（十五）禮"]
-// const files = ["參（辭）駕禮"]
-// const files = ["安座禮"]
-// const files = ["早晚香禮"]
-// const files = ["獻供禮"]
-// const files = ["老中大典禮"]
-// const files = ["謝恩禮"];
-// const files = ["辦道禮"]
-// const files = ["過年禮"]
-// const files = ["道喜（祝壽）禮"]
-// const files = ["開班禮"]
-
-// This is to create PDFs for all the ceremonies in bulk
-const files = [
-  "三天法會",
-  "初一（十五）禮",
-  "參（辭）駕禮",
-  "安座禮",
-  "早晚香禮",
-  "獻供禮",
-  "老中大典禮",
-  "謝恩禮",
-  "辦道禮",
-  "過年禮",
-  "道喜（祝壽）禮",
-  "開班禮"
-];
-
-files.forEach(file => {
-  const doc = new PDFDocument({ autoFirstPage: false });
-  let pageNumber = 1;
-  doc.on("pageAdded", () => {
-    //Add page number to the bottom of the every page
-    doc
-      .font(font)
-      .fontSize(10)
-      .text(pageNumber, 570, 820);
-    pageNumber++;
-  });
-
-  doc.addPage({
-    margin: 0,
-    size: "A4"
-  });
-
-  const ceremony = `${__dirname}\\ceremonies\\${file}.xlsx`;
-  doc.pipe(fs.createWriteStream(`${file}.pdf`));
-  parseLectureData(ceremony, doc);
-});
