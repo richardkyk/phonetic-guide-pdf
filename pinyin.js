@@ -48,17 +48,8 @@ const files = [
 ];
 
 files.forEach(file => {
-  const doc = new PDFDocument({ autoFirstPage: false });
-  let pageNumber = 1;
-  doc.on("pageAdded", () => {
-    //Add page number to the bottom of the every page
-    doc
-      .font(font)
-      .fontSize(10)
-      .text(pageNumber, 570, 820);
-    pageNumber++;
-  });
-
+  const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
+  doc.filename = file;
   doc.addPage({
     margin: 0,
     size: "A4"
@@ -129,6 +120,22 @@ function createPDF(phrases, doc) {
       writeText(phrase, fontSize, x, y, doc, characterSpacing);
     }
   });
+
+  // Adding page numbers
+  const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
+
+  for (
+    i = range.start, end = range.start + range.count, range.start <= end;
+    i < end;
+    i++
+  ) {
+    doc.switchToPage(i);
+    let pageNum = `${doc.filename} ${i + 1}/${range.count}`;
+    doc
+      .font(font)
+      .fontSize(10)
+      .text(pageNum, 570 - getWidth(pageNum, 10, doc), 800);
+  }
   doc.end();
 }
 
