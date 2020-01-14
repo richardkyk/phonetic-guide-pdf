@@ -14,7 +14,6 @@ const fontSize = 18; // Font size of the chinese characters
 const zhuyinSize = 6; // Font size of the zhuyin
 const titleSize = 30; // Font size of the title
 const characterSpacing = 10; // Distance between letters
-let titleSpacing = characterSpacing * 5; // Distance below the title
 const margin = 36; // Margin top, bottom, left and right
 
 // This is to create PDFs for individual ceremonies
@@ -48,17 +47,8 @@ const files = [
 ];
 
 files.forEach(file => {
-  const doc = new PDFDocument({ autoFirstPage: false });
-  let pageNumber = 1;
-  doc.on("pageAdded", () => {
-    //Add page number to the bottom of the every page
-    doc
-      .font(font)
-      .fontSize(10)
-      .text(pageNumber, 570, 820);
-    pageNumber++;
-  });
-
+  const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
+  doc.filename = file;
   doc.addPage({
     margin: 0,
     size: "A4"
@@ -66,17 +56,17 @@ files.forEach(file => {
 
   const ceremony = `${__dirname}\\ceremonies\\${file}.xlsx`;
   doc.pipe(fs.createWriteStream(`${file}.pdf`));
-  parseLectureData(ceremony, doc);
+  parseLectureData(doc, ceremony);
 });
 
-function parseLectureData(filename, doc) {
+function parseLectureData(doc, filename) {
   const workbook = XLSX.readFile(filename);
   var sheet_name_list = workbook.SheetNames;
   const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-  createPDF(data, doc);
+  createPDF(doc, data);
 }
 
-function createPDF(phrases, doc) {
+function createPDF(doc, phrases) {
   let anchorRow = 0;
   phrases.forEach(phrase => {
     let x = margin;
@@ -93,16 +83,16 @@ function createPDF(phrases, doc) {
         x =
           A4[0] -
           margin -
-          getWidth(phrase.chinese, fontSize, doc, characterSpacing);
+          getWidth(doc, phrase.chinese, fontSize, characterSpacing);
         break;
       case "center":
         x =
-          (A4[0] - getWidth(phrase.chinese, fontSize, doc, characterSpacing)) /
+          (A4[0] - getWidth(doc, phrase.chinese, fontSize, characterSpacing)) /
           2;
         break;
       case "centerTitle":
         x =
-          (A4[0] - getWidth(phrase.chinese, titleSize, doc, characterSpacing)) /
+          (A4[0] - getWidth(doc, phrase.chinese, titleSize, characterSpacing)) /
           2;
         break;
       default:
@@ -122,15 +112,31 @@ function createPDF(phrases, doc) {
       });
     }
     if (phrase.row == 0) {
-      writeZhuyin(phrase, titleSize, x, y / 2, doc, characterSpacing);
+      writeZhuyin(doc, phrase, titleSize, x, y / 2, characterSpacing);
     } else {
-      writeZhuyin(phrase, fontSize, x, y, doc, characterSpacing);
+      writeZhuyin(doc, phrase, fontSize, x, y, characterSpacing);
     }
   });
+
+  // Adding page numbers
+  const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
+
+  for (
+    i = range.start, end = range.start + range.count, range.start <= end;
+    i < end;
+    i++
+  ) {
+    doc.switchToPage(i);
+    let pageNum = `${doc.filename} ${i + 1}/${range.count}`;
+    doc
+      .font(font)
+      .fontSize(10)
+      .text(pageNum, 565 - getWidth(doc, pageNum, 10), 815);
+  }
   doc.end();
 }
 
-function getHeight(text, fontSize, doc, characterSpacing = null) {
+function getHeight(doc, text, fontSize, characterSpacing = null) {
   return doc
     .font(font)
     .fontSize(fontSize)
@@ -138,7 +144,7 @@ function getHeight(text, fontSize, doc, characterSpacing = null) {
       characterSpacing
     });
 }
-function getWidth(text, fontSize, doc, characterSpacing = null) {
+function getWidth(doc, text, fontSize, characterSpacing = null) {
   return doc
     .font(font)
     .fontSize(fontSize)
@@ -146,7 +152,7 @@ function getWidth(text, fontSize, doc, characterSpacing = null) {
       characterSpacing
     });
 }
-function writeZhuyin(text, fontSize, x, y, doc, characterSpacing = null) {
+function writeZhuyin(doc, text, fontSize, x, y, characterSpacing = null) {
   // Chinese characters
   doc
     .font(font)
@@ -166,14 +172,14 @@ function writeZhuyin(text, fontSize, x, y, doc, characterSpacing = null) {
 
     // Splitting the zhuyin into glyphs
     word.split("").forEach(symbol => {
-      const zhuyinHeight = getHeight(symbol, zhuyinSize, doc);
+      const zhuyinHeight = getHeight(doc, symbol, zhuyinSize);
 
       let toneSize = 0;
       let toneOffset = 0;
       if ("`ˇˊ".includes(symbol)) {
         toneSize = 10;
         toneOffset =
-          (getWidth(symbol, toneSize + zhuyinSize, doc) - zhuyinSize) / 2 -
+          (getWidth(doc, symbol, toneSize + zhuyinSize) - zhuyinSize) / 2 -
           zhuyinSize +
           1; // offset for the tone to bring it 1 unit closer to the character
         offset = (offset - zhuyinHeight) / 2;

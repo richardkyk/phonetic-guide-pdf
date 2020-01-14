@@ -14,7 +14,6 @@ const fontSize = 20; // Font size of the chinese characters
 const pinyinSize = 10; // Font size of the pinyin
 const titleSize = 30; // Font size of the title
 const characterSpacing = 5; // Distance between letters
-let titleSpacing = characterSpacing * 5; // Distance below the title
 const margin = 64; // Margin top, bottom, left and right
 
 // This is to create PDFs for individual ceremonies
@@ -57,17 +56,17 @@ files.forEach(file => {
 
   const ceremony = `${__dirname}\\ceremonies\\${file}.xlsx`;
   doc.pipe(fs.createWriteStream(`${file}.pdf`));
-  parseLectureData(ceremony, doc);
+  parseLectureData(doc, ceremony);
 });
 
-function parseLectureData(filename, doc) {
+function parseLectureData(doc, filename) {
   const workbook = XLSX.readFile(filename);
   var sheet_name_list = workbook.SheetNames;
   const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-  createPDF(data, doc);
+  createPDF(doc, data);
 }
 
-function createPDF(phrases, doc) {
+function createPDF(doc, phrases) {
   let anchorRow = 0;
   phrases.forEach(phrase => {
     let x = margin;
@@ -84,16 +83,16 @@ function createPDF(phrases, doc) {
         x =
           A4[0] -
           margin -
-          getWidth(phrase.chinese, fontSize, doc, characterSpacing);
+          getWidth(doc, phrase.chinese, fontSize, characterSpacing);
         break;
       case "center":
         x =
-          (A4[0] - getWidth(phrase.chinese, fontSize, doc, characterSpacing)) /
+          (A4[0] - getWidth(doc, phrase.chinese, fontSize, characterSpacing)) /
           2;
         break;
       case "centerTitle":
         x =
-          (A4[0] - getWidth(phrase.chinese, titleSize, doc, characterSpacing)) /
+          (A4[0] - getWidth(doc, phrase.chinese, titleSize, characterSpacing)) /
           2;
         break;
       default:
@@ -115,9 +114,9 @@ function createPDF(phrases, doc) {
       });
     }
     if (phrase.row == 0) {
-      writeText(phrase, titleSize, x, y - titleSpacing, doc, characterSpacing);
+      writeText(doc, phrase, titleSize, x, y / 2, characterSpacing);
     } else {
-      writeText(phrase, fontSize, x, y, doc, characterSpacing);
+      writeText(doc, phrase, fontSize, x, y, characterSpacing);
     }
   });
 
@@ -134,12 +133,12 @@ function createPDF(phrases, doc) {
     doc
       .font(font)
       .fontSize(10)
-      .text(pageNum, 570 - getWidth(pageNum, 10, doc), 800);
+      .text(pageNum, 565 - getWidth(doc, pageNum, 10), 810);
   }
   doc.end();
 }
 
-function getWidth(text, fontSize, doc, characterSpacing = null) {
+function getWidth(doc, text, fontSize, characterSpacing = null) {
   return doc
     .font(font)
     .fontSize(fontSize)
@@ -148,7 +147,7 @@ function getWidth(text, fontSize, doc, characterSpacing = null) {
     });
 }
 
-function writeText(text, fontSize, x, y, doc, characterSpacing = null) {
+function writeText(doc, text, fontSize, x, y, characterSpacing = null) {
   // Chinese characters
   doc
     .font(font)
@@ -161,7 +160,7 @@ function writeText(text, fontSize, x, y, doc, characterSpacing = null) {
   // Pinyin
   const words = text.pinyin.split(" ");
   words.forEach(word => {
-    const pinyinWidth = getWidth(word, pinyinSize, doc);
+    const pinyinWidth = getWidth(doc, word, pinyinSize);
     const offset = (fontSize - pinyinWidth) / 2;
     doc
       .font(font)
