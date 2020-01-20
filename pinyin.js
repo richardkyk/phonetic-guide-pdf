@@ -8,7 +8,7 @@ const XLSX = require("xlsx");
 // Then offset both accordingly
 
 const A4 = [595.28, 841.89];
-const font = `${__dirname}\\DENGL.ttf`;
+const font = `${__dirname}\\DENG.ttf`;
 // const font = "C://WINDOWS//FONTS//DENGL.TTF";
 const fontSize = 20; // Font size of the chinese characters
 const pinyinSize = 10; // Font size of the pinyin
