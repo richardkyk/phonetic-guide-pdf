@@ -13,7 +13,7 @@ const font = `${__dirname}\\DENG.ttf`;
 const fontSize = 20; // Font size of the chinese characters
 const pinyinSize = 10; // Font size of the pinyin
 const titleSize = 30; // Font size of the title
-const characterSpacing = 8; // Distance between letters
+const characterSpacing = 5; // Distance between letters
 const margin = 64; // Margin top, bottom, left and right
 
 // This is to create PDFs for individual ceremonies
