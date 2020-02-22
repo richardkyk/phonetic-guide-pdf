@@ -13,7 +13,7 @@ const font = `${__dirname}\\DENG.ttf`;
 const fontSize = 20; // Font size of the chinese characters
 const pinyinSize = 10; // Font size of the pinyin
 const titleSize = 30; // Font size of the title
-const characterSpacing = 5; // Distance between letters
+const characterSpacing = 8; // Distance between letters
 const margin = 64; // Margin top, bottom, left and right
 
 // This is to create PDFs for individual ceremonies
@@ -29,22 +29,23 @@ const margin = 64; // Margin top, bottom, left and right
 // const files = ["過年禮"]
 // const files = ["道喜（祝壽）禮"]
 // const files = ["開班禮"]
+const files = ["彌勒救苦真經"]
 
 // This is to create PDFs for all the ceremonies in bulk
-const files = [
-  "三天法會",
-  "初一（十五）禮",
-  "參（辭）駕禮",
-  "安座禮",
-  "早晚香禮",
-  "獻供禮",
-  "老中大典禮",
-  "謝恩禮",
-  "辦道禮",
-  "過年禮",
-  "道喜（祝壽）禮",
-  "開班禮"
-];
+// const files = [
+//   "三天法會",
+//   "初一（十五）禮",
+//   "參（辭）駕禮",
+//   "安座禮",
+//   "早晚香禮",
+//   "獻供禮",
+//   "老中大典禮",
+//   "謝恩禮",
+//   "辦道禮",
+//   "過年禮",
+//   "道喜（祝壽）禮",
+//   "開班禮"
+// ];
 
 files.forEach(file => {
   const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });

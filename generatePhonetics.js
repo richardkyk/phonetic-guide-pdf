@@ -28,7 +28,7 @@ function download(exportData) {
   XLSX.writeFile(wb, name);
 }
 
-const filename = "三天法會";
+// const filename = "三天法會";
 // const filename = "初一（十五）禮";
 // const filename = "參（辭）駕禮";
 // const filename = "安座禮";
@@ -40,6 +40,7 @@ const filename = "三天法會";
 // const filename = "過年禮";
 // const filename = "道喜（祝壽）禮";
 // const filename = "開班禮";
+const filename = "彌勒救苦真經"
 
 const ceremony = `${__dirname}\\ceremonies\\${filename}.xlsx`;
 
