@@ -10,11 +10,11 @@ const XLSX = require("xlsx");
 const A4 = [595.28, 841.89];
 const font = `${__dirname}\\DENG.ttf`;
 // const font = "C://WINDOWS//FONTS//DENGL.TTF";
-const fontSize = 20; // Font size of the chinese characters
-const pinyinSize = 10; // Font size of the pinyin
-const titleSize = 30; // Font size of the title
-const characterSpacing = 5; // Distance between letters
-const margin = 64; // Margin top, bottom, left and right
+const fontSize = 20; // Font size of the chinese characters default: 20
+const pinyinSize = 10; // Font size of the pinyin default: 10
+const titleSize = 30; // Font size of the title default: 30
+const characterSpacing = 5; // Distance between letters default: 5
+const margin = 64; // Margin top, bottom, left and right default: 64
 
 // This is to create PDFs for individual ceremonies
 // const files = ["三天法會"];
@@ -29,7 +29,8 @@ const margin = 64; // Margin top, bottom, left and right
 // const files = ["過年禮"]
 // const files = ["道喜（祝壽）禮"]
 // const files = ["開班禮"]
-const files = ["彌勒救苦真經"]
+// const files = ["彌勒救苦真經"]
+const files = ["餐前謝恩詞"];
 
 // This is to create PDFs for all the ceremonies in bulk
 // const files = [

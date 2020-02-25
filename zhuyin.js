@@ -29,6 +29,8 @@ const margin = 36; // Margin top, bottom, left and right
 // const files = ["過年禮"]
 // const files = ["道喜（祝壽）禮"]
 // const files = ["開班禮"]
+// const files = ["彌勒救苦真經"]
+// const files = ["餐前謝恩詞"];
 
 // This is to create PDFs for all the ceremonies in bulk
 const files = [
