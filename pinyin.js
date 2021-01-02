@@ -31,27 +31,29 @@ const margin = 64; // Margin top, bottom, left and right
 // const files = ["開班禮"]
 
 // This is to create PDFs for all the ceremonies in bulk
-const files = [
-  "三天法會",
-  "初一（十五）禮",
-  "參（辭）駕禮",
-  "安座禮",
-  "早晚香禮",
-  "獻供禮",
-  "老中大典禮",
-  "謝恩禮",
-  "辦道禮",
-  "過年禮",
-  "道喜（祝壽）禮",
-  "開班禮"
-];
+// const files = [
+//   "三天法會",
+//   "初一（十五）禮",
+//   "參（辭）駕禮",
+//   "安座禮",
+//   "早晚香禮",
+//   "獻供禮",
+//   "老中大典禮",
+//   "謝恩禮",
+//   "辦道禮",
+//   "過年禮",
+//   "道喜（祝壽）禮",
+//   "開班禮"
+// ];
 
-files.forEach(file => {
+const files = ["小时候的我们"];
+
+files.forEach((file) => {
   const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
   doc.filename = file;
   doc.addPage({
     margin: 0,
-    size: "A4"
+    size: "A4",
   });
 
   const ceremony = `${__dirname}\\ceremonies\\${file}.xlsx`;
@@ -68,15 +70,17 @@ function parseLectureData(doc, filename) {
 
 function createPDF(doc, phrases) {
   let anchorRow = 0;
-  phrases.forEach(phrase => {
+  phrases.forEach((phrase) => {
     let x = margin;
 
     switch (phrase.align) {
+      case "newline":
+        return;
       case "break":
         anchorRow = 1;
         doc.addPage({
           margin: 0,
-          size: "A4"
+          size: "A4",
         });
         return;
       case "right":
@@ -110,7 +114,7 @@ function createPDF(doc, phrases) {
       anchorRow = phrase.row;
       doc.addPage({
         margin: 0,
-        size: "A4"
+        size: "A4",
       });
     }
     if (phrase.row == 0) {
@@ -139,12 +143,9 @@ function createPDF(doc, phrases) {
 }
 
 function getWidth(doc, text, fontSize, characterSpacing = null) {
-  return doc
-    .font(font)
-    .fontSize(fontSize)
-    .widthOfString(text, {
-      characterSpacing
-    });
+  return doc.font(font).fontSize(fontSize).widthOfString(text, {
+    characterSpacing,
+  });
 }
 
 function writeText(doc, text, fontSize, x, y, characterSpacing = null) {
@@ -152,14 +153,21 @@ function writeText(doc, text, fontSize, x, y, characterSpacing = null) {
   doc
     .font(font)
     .fontSize(fontSize)
-    .text(text.chinese, x, y + pinyinSize, {
+    .text(text.chinese.replace(/ /g, "　"), x, y + pinyinSize, {
       characterSpacing,
-      lineBreak: false
+      lineBreak: false,
     });
 
   // Pinyin
   const words = text.pinyin.split(" ");
-  words.forEach(word => {
+  const chars = text.chinese.replace(/ /g, "　").split("");
+  for (const [i, char] of chars.entries()) {
+    if (char == "　") {
+      words.splice(i, 0, " ");
+    }
+  }
+
+  for (const word of words) {
     const pinyinWidth = getWidth(doc, word, pinyinSize);
     const offset = (fontSize - pinyinWidth) / 2;
     doc
@@ -167,5 +175,15 @@ function writeText(doc, text, fontSize, x, y, characterSpacing = null) {
       .fontSize(pinyinSize)
       .text(word, x + offset, y);
     x += fontSize + characterSpacing;
-  });
+  }
+
+  // words.forEach((word) => {
+  //   const pinyinWidth = getWidth(doc, word, pinyinSize);
+  //   const offset = (fontSize - pinyinWidth) / 2;
+  //   doc
+  //     .font(font)
+  //     .fontSize(pinyinSize)
+  //     .text(word, x + offset, y);
+  //   x += fontSize + characterSpacing;
+  // });
 }

@@ -5,17 +5,21 @@ const XLSX = require("xlsx");
 function generatePhonetics(filename) {
   const workbook = XLSX.readFile(filename);
   var sheet_name_list = workbook.SheetNames;
-  const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+  let data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+
   const exportData = [];
-  data.forEach(phrase => {
-    if (!phrase.pinyin) {
-      phrase.pinyin = pinyin(phrase.chinese);
-    }
-    if (!phrase.zhuyin) {
-      phrase.zhuyin = zhuyin(phrase.pinyin).join(" ");
+
+  for (phrase of data) {
+    if (!["break", "newline"].includes(phrase.align)) {
+      if (!phrase.pinyin) {
+        phrase.pinyin = pinyin(phrase.chinese.replace("　", ""));
+      }
+      if (!phrase.zhuyin) {
+        phrase.zhuyin = zhuyin(phrase.pinyin).join(" ");
+      }
     }
     exportData.push(phrase);
-  });
+  }
 
   download(exportData);
 }
@@ -28,7 +32,9 @@ function download(exportData) {
   XLSX.writeFile(wb, name);
 }
 
-const filename = "三天法會";
+const filename = "小时候的我们";
+
+// const filename = "三天法會";
 // const filename = "初一（十五）禮";
 // const filename = "參（辭）駕禮";
 // const filename = "安座禮";
@@ -44,3 +50,5 @@ const filename = "三天法會";
 const ceremony = `${__dirname}\\ceremonies\\${filename}.xlsx`;
 
 generatePhonetics(ceremony);
+
+// console.log(pinyin("小时候的我们"));
