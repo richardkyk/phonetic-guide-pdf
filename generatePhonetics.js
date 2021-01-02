@@ -46,6 +46,8 @@ const filename = "小时候的我们";
 // const filename = "過年禮";
 // const filename = "道喜（祝壽）禮";
 // const filename = "開班禮";
+// const filename = "彌勒救苦真經"
+const filename = "餐前謝恩詞";
 
 const ceremony = `${__dirname}\\ceremonies\\${filename}.xlsx`;
 
