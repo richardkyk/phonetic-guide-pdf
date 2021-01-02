@@ -176,14 +176,4 @@ function writeText(doc, text, fontSize, x, y, characterSpacing = null) {
       .text(word, x + offset, y);
     x += fontSize + characterSpacing;
   }
-
-  // words.forEach((word) => {
-  //   const pinyinWidth = getWidth(doc, word, pinyinSize);
-  //   const offset = (fontSize - pinyinWidth) / 2;
-  //   doc
-  //     .font(font)
-  //     .fontSize(pinyinSize)
-  //     .text(word, x + offset, y);
-  //   x += fontSize + characterSpacing;
-  // });
 }
