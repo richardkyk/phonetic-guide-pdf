@@ -11,7 +11,7 @@ So I created my own tool which adds pinyin/zhuyin phonetic guides to chinese cha
 ### Installation
 1. Clone the repo  
 ```git clone https://github.com/richardkyk/phonetic-guide-pdf.git```
-2. Install NPM packages
+2. Install NPM packages  
 ```npm install```
 
 ### Usage
