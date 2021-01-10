@@ -2,7 +2,7 @@
 
 
 ## About The Project
-I wasn't satisfied with Microsoft Word's implementation as it was slow to input and hard to format.
+I wasn't satisfied with Microsoft Word's implementation as it was slow to input and hard to format.  
 So I created my own tool which adds pinyin/zhuyin phonetic guides to chinese characters and exports it to a PDF.
 
 
