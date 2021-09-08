@@ -8,21 +8,21 @@ const XLSX = require("xlsx");
 // Then offset both accordingly
 
 const A4 = [595.28, 841.89];
-const font = `${__dirname}\\msyh.ttf`;
-const fontSize = 16; // Font size of the chinese characters default: 20
+// const font = `${__dirname}\\msyh.ttf`;
+const font = `${__dirname}\\kaiu.ttf`;
+const fontEnglish = `${__dirname}\\msyh.ttf`;
+const fontSize = 22; // Font size of the chinese characters default: 20
 const pinyinSize = 8; // Font size of the pinyin default: 10
+const pinyinOffset = 2; // Distance pinyin is above character
 const titleSize = 30; // Font size of the title default: 30
 const characterSpacing = 8; // Distance between letters default: 5
 const margin = 64; // Margin top, bottom, left and right default: 64
 
-
-
-const files = process.argv.slice(2)
-
+const files = process.argv.slice(2);
 
 files.forEach((file) => {
   const doc = new PDFDocument({ autoFirstPage: false, bufferPages: true });
-  const filename = file.replace(".xlsx", "")
+  const filename = file.replace(".xlsx", "");
   doc.filename = filename;
   doc.addPage({
     margin: 0,
@@ -104,8 +104,9 @@ function createPDF(doc, phrases) {
     i++
   ) {
     doc.switchToPage(i);
-    let pageNum = `${doc.filename} ${i + 1}/${range.count}`;
+    let pageNum = `${doc.filename.replace(".\\", "")} ${i + 1}/${range.count}`;
     doc
+      .fill([7, 5, 0, 83])
       .font(font)
       .fontSize(10)
       .text(pageNum, 565 - getWidth(doc, pageNum, 10), 810);
@@ -118,13 +119,19 @@ function getWidth(doc, text, fontSize, characterSpacing = null) {
     characterSpacing,
   });
 }
+function getPinyinWidth(doc, text, fontSize, characterSpacing = null) {
+  return doc.font(fontEnglish).fontSize(fontSize).widthOfString(text, {
+    characterSpacing,
+  });
+}
 
 function writeText(doc, text, fontSize, x, y, characterSpacing = null) {
   // Chinese characters
   doc
+    .fill([7, 5, 0, 83])
     .font(font)
     .fontSize(fontSize)
-    .text(text.chinese.replace(/ /g, "　"), x, y + pinyinSize, {
+    .text(text.chinese.replace(/ /g, "　"), x, y + pinyinSize + pinyinOffset, {
       characterSpacing,
       lineBreak: false,
     });
@@ -132,6 +139,7 @@ function writeText(doc, text, fontSize, x, y, characterSpacing = null) {
   // Pinyin
   const words = text.pinyin.split(" ");
   const chars = text.chinese.replace(/ /g, "　").split("");
+  const charWidth = getWidth(doc, text.chinese.slice(0, 1), fontSize);
   for (const [i, char] of chars.entries()) {
     if (char == "　") {
       words.splice(i, 0, " ");
@@ -139,12 +147,14 @@ function writeText(doc, text, fontSize, x, y, characterSpacing = null) {
   }
 
   for (const word of words) {
-    const pinyinWidth = getWidth(doc, word, pinyinSize);
-    const offset = (fontSize - pinyinWidth) / 2;
+    const pinyinWidth = getPinyinWidth(doc, word, pinyinSize);
+    const offset = (charWidth - pinyinWidth) / 2;
+
     doc
-      .font(font)
+      .fill([7, 5, 0, 83])
+      .font(fontEnglish)
       .fontSize(pinyinSize)
       .text(word, x + offset, y);
-    x += fontSize + characterSpacing;
+    x += charWidth + characterSpacing;
   }
 }
