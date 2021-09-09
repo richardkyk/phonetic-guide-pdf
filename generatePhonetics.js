@@ -8,12 +8,17 @@ function generatePhonetics(filename) {
   let data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
 
   const exportData = [];
-
   for (phrase of data) {
     if (!["break", "newline"].includes(phrase.align)) {
-      if (!phrase.pinyin) {
-        phrase.pinyin = pinyin(phrase.chinese.replace(/[　 ]/g, ""));
+      const chinesePhrases = phrase.chinese
+        .replace(/[。：，； 　]/g, ";")
+        .split(";");
+      const output = [];
+      for (const chinesePhrase of chinesePhrases) {
+        output.push(pinyin(chinesePhrase));
       }
+      phrase.pinyin = output.join("  ");
+
       if (!phrase.zhuyin) {
         phrase.zhuyin = zhuyin(phrase.pinyin).join(" ");
       }
@@ -32,7 +37,7 @@ function download(filename, exportData) {
   XLSX.writeFile(wb, name);
 }
 
-const files = process.argv.slice(2)
-files.forEach(file => {
+const files = process.argv.slice(2);
+files.forEach((file) => {
   generatePhonetics(file);
-})
+});

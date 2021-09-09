@@ -9,7 +9,7 @@ const XLSX = require("xlsx");
 
 const A4 = [595.28, 841.89];
 // const font = `${__dirname}\\msyh.ttf`;
-const font = `${__dirname}\\kaiu.ttf`;
+const font = `${__dirname}\\茶盐粗楷体.ttf`;
 const fontEnglish = `${__dirname}\\msyh.ttf`;
 const fontSize = 22; // Font size of the chinese characters default: 20
 const pinyinSize = 8; // Font size of the pinyin default: 10
@@ -43,7 +43,6 @@ function createPDF(doc, phrases) {
   let anchorRow = 0;
   phrases.forEach((phrase) => {
     let x = margin;
-
     switch (phrase.align) {
       case "newline":
         return;
