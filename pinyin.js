@@ -15,8 +15,8 @@ const fontSize = 22; // Font size of the chinese characters default: 20
 const pinyinSize = 8; // Font size of the pinyin default: 10
 const pinyinOffset = 2; // Distance pinyin is above character
 const titleSize = 30; // Font size of the title default: 30
-const characterSpacing = 8; // Distance between letters default: 5
-const margin = 64; // Margin top, bottom, left and right default: 64
+const characterSpacing = 5; // Distance between letters default: 5
+const margin = 32; // Margin top, bottom, left and right default: 64
 
 const files = process.argv.slice(2);
 
@@ -57,16 +57,16 @@ function createPDF(doc, phrases) {
         x =
           A4[0] -
           margin -
-          getWidth(doc, phrase.chinese, fontSize, characterSpacing);
+          getWidth(doc, phrase.chinese.replace(/ /g, "　"), fontSize, characterSpacing);
         break;
       case "center":
         x =
-          (A4[0] - getWidth(doc, phrase.chinese, fontSize, characterSpacing)) /
+          (A4[0] - getWidth(doc, phrase.chinese.replace(/ /g, "　"), fontSize, characterSpacing)) /
           2;
         break;
       case "centerTitle":
         x =
-          (A4[0] - getWidth(doc, phrase.chinese, titleSize, characterSpacing)) /
+          (A4[0] - getWidth(doc, phrase.chinese.replace(/ /g, "　"), titleSize, characterSpacing)) /
           2;
         break;
       default:
@@ -75,9 +75,7 @@ function createPDF(doc, phrases) {
         break;
     }
 
-    let y =
-      margin +
-      (phrase.row - anchorRow) * (pinyinSize + fontSize + characterSpacing);
+    let y = margin + (phrase.row - anchorRow) * (pinyinSize + fontSize + characterSpacing);
 
     if (y >= A4[1] - margin) {
       y = margin;
@@ -97,11 +95,7 @@ function createPDF(doc, phrases) {
   // Adding page numbers
   const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
 
-  for (
-    i = range.start, end = range.start + range.count, range.start <= end;
-    i < end;
-    i++
-  ) {
+  for (i = range.start, end = range.start + range.count, range.start <= end; i < end; i++) {
     doc.switchToPage(i);
     let pageNum = `${doc.filename.replace(".\\", "")} ${i + 1}/${range.count}`;
     doc
@@ -137,13 +131,14 @@ function writeText(doc, text, fontSize, x, y, characterSpacing = null) {
 
   // Pinyin
   const words = text.pinyin.split(" ");
-  const chars = text.chinese.replace(/ /g, "　").split("");
+  // const chars = text.chinese.replace(/ /g, "　").split("");
   const charWidth = getWidth(doc, text.chinese.slice(0, 1), fontSize);
-  for (const [i, char] of chars.entries()) {
-    if (char == "　") {
-      words.splice(i, 0, " ");
-    }
-  }
+  // for (const [i, char] of chars.entries()) {
+  //   if (char == "　") {
+  //     words.splice(i, 0, " ");
+  //   }
+  // }
+  // console.log(words);
 
   for (const word of words) {
     const pinyinWidth = getPinyinWidth(doc, word, pinyinSize);
